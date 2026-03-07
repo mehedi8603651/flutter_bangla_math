@@ -10,7 +10,10 @@ import 'parser.dart';
 import 'utils.dart';
 
 @immutable
+
+/// Configuration for math sizing, spacing, and parser behavior.
 class MathConfig {
+  /// Creates rendering settings shared by inline and block math widgets.
   const MathConfig({
     this.inlineScale = 1.05,
     this.blockScale = 1.2,
@@ -22,15 +25,31 @@ class MathConfig {
     this.parserSettings = const TexParserSettings(),
   });
 
+  /// Multiplier applied to the surrounding text size for inline math.
   final double inlineScale;
+
+  /// Multiplier applied to the surrounding text size for block math.
   final double blockScale;
+
+  /// Baseline factor used to align inline math with surrounding text.
   final double inlineBaselineFactor;
+
+  /// Total vertical margin applied around rendered block math.
   final double blockVerticalMargin;
+
+  /// Alignment used for block math widgets.
   final AlignmentGeometry blockAlignment;
+
+  /// Optional logical PPI forwarded to `flutter_math_fork`.
   final double? logicalPpi;
+
+  /// Optional style used when math rendering falls back to error text.
   final TextStyle? errorStyle;
+
+  /// TeX parser settings forwarded to `flutter_math_fork`.
   final TexParserSettings parserSettings;
 
+  /// Returns a copy of this config with the provided fields replaced.
   MathConfig copyWith({
     double? inlineScale,
     double? blockScale,
@@ -54,7 +73,12 @@ class MathConfig {
   }
 }
 
+/// Renders mixed Bangla text and LaTeX math from a single input string.
+///
+/// The widget supports plain text, inline math with `$...$`, block math with
+/// `$$...$$`, and inline fractions with `\bnfrac{...}{...}`.
 class BanglaMathText extends StatelessWidget {
+  /// Creates a widget that renders mixed Bangla text and math from [data].
   const BanglaMathText({
     super.key,
     required this.data,
@@ -68,14 +92,31 @@ class BanglaMathText extends StatelessWidget {
     this.cache,
   });
 
+  /// Source string containing Bangla text and supported math syntax.
   final String data;
+
+  /// Optional text style merged with the ambient default text style.
   final TextStyle? style;
+
+  /// Rendering configuration for inline and block math segments.
   final MathConfig? mathConfig;
+
+  /// Optional font family override for the Bangla text portions.
   final String? fontFamily;
+
+  /// Locale used for Bangla text shaping.
   final Locale locale;
+
+  /// Alignment applied to inline text segments and paragraph output.
   final TextAlign textAlign;
+
+  /// Whether text segments may soft-wrap.
   final bool softWrap;
+
+  /// Optional text scaling override.
   final TextScaler? textScaler;
+
+  /// Optional cache used for rendered math widgets.
   final MathWidgetCache? cache;
 
   @override
@@ -226,7 +267,13 @@ class BanglaMathText extends StatelessWidget {
   }
 }
 
+/// Renders a Bangla-aware stacked fraction from numerator and denominator text.
+///
+/// Both [numerator] and [denominator] are rendered with [BanglaMathText], so
+/// they can themselves contain Bangla text and inline math.
 class BanglaMathFraction extends StatefulWidget {
+  /// Creates a fraction widget from Bangla-aware numerator and denominator
+  /// strings.
   const BanglaMathFraction({
     super.key,
     required this.numerator,
@@ -246,19 +293,46 @@ class BanglaMathFraction extends StatefulWidget {
   })  : assert(barThickness > 0, 'barThickness must be positive.'),
         assert(gap >= 0, 'gap must be non-negative.');
 
+  /// Numerator content rendered above the fraction bar.
   final String numerator;
+
+  /// Denominator content rendered below the fraction bar.
   final String denominator;
+
+  /// Optional text style merged into both numerator and denominator text.
   final TextStyle? style;
+
+  /// Rendering configuration forwarded to nested [BanglaMathText] widgets.
   final MathConfig? mathConfig;
+
+  /// Optional font family override for Bangla text inside the fraction.
   final String? fontFamily;
+
+  /// Locale used for numerator and denominator Bangla text.
   final Locale locale;
+
+  /// Text alignment applied to numerator and denominator lines.
   final TextAlign textAlign;
+
+  /// Whether numerator and denominator text may soft-wrap.
   final bool softWrap;
+
+  /// Optional text scaling override for the fraction content.
   final TextScaler? textScaler;
+
+  /// Optional cache used by nested math segments.
   final MathWidgetCache? cache;
+
+  /// Color used for the fraction bar. Defaults to the resolved text color.
   final Color? barColor;
+
+  /// Thickness of the fraction bar.
   final double barThickness;
+
+  /// Vertical gap between the fraction bar and each text line.
   final double gap;
+
+  /// Outer padding applied around the fraction widget.
   final EdgeInsetsGeometry padding;
 
   @override

@@ -7,9 +7,13 @@ const int _dollarCodeUnit = 36;
 const String _banglaFractionCommand = r'\bnfrac';
 
 @immutable
+
+/// Base token type produced by [BanglaMathParser] and [parseBanglaMath].
 sealed class BanglaMathToken {
+  /// Creates a token with a raw string [value].
   const BanglaMathToken(this.value);
 
+  /// Raw token payload used by text and math tokens.
   final String value;
 
   @override
@@ -24,28 +28,43 @@ sealed class BanglaMathToken {
 }
 
 @immutable
+
+/// Plain text outside any math delimiters.
 final class TextToken extends BanglaMathToken {
+  /// Creates a text token.
   const TextToken(super.value);
 }
 
 @immutable
+
+/// Inline math content extracted from `$...$`.
 final class InlineMathToken extends BanglaMathToken {
+  /// Creates an inline math token.
   const InlineMathToken(super.value);
 }
 
 @immutable
+
+/// Display math content extracted from `$$...$$`.
 final class BlockMathToken extends BanglaMathToken {
+  /// Creates a block math token.
   const BlockMathToken(super.value);
 }
 
 @immutable
+
+/// Inline Bangla fraction content extracted from `\bnfrac{...}{...}`.
 final class BanglaFractionToken extends BanglaMathToken {
+  /// Creates a Bangla fraction token with numerator and denominator content.
   const BanglaFractionToken({
     required this.numerator,
     required this.denominator,
   }) : super('');
 
+  /// Fraction numerator content rendered with [BanglaMathText].
   final String numerator;
+
+  /// Fraction denominator content rendered with [BanglaMathText].
   final String denominator;
 
   @override
@@ -61,12 +80,24 @@ final class BanglaFractionToken extends BanglaMathToken {
 
 enum _ParserMode { text, inlineMath, blockMath }
 
+/// Parses mixed Bangla text and math into token objects.
 class BanglaMathParser {
+  /// Creates a parser for mixed Bangla text and math.
   const BanglaMathParser();
 
+  /// Tokenizes [input] into text, inline math, block math, and `\bnfrac`
+  /// segments.
   List<BanglaMathToken> parse(String input) => parseBanglaMath(input);
 }
 
+/// Tokenizes [input] into a sequence of Bangla text and math tokens.
+///
+/// Supported syntax:
+/// - plain text
+/// - inline math with `$...$`
+/// - block math with `$$...$$`
+/// - inline Bangla fractions with `\bnfrac{...}{...}`
+/// - escaped dollar signs with `\$`
 List<BanglaMathToken> parseBanglaMath(String input) {
   final normalizedInput = canonicalizeWhitespace(input);
   final tokens = <BanglaMathToken>[];

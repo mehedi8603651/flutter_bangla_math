@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Added dartdoc comments across the exported API to improve pub.dev
+  documentation coverage and package score.
+
 ## 0.4.0
 
 - Added inline `\bnfrac{...}{...}` parsing in `BanglaMathText` so a Bangla

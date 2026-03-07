@@ -3,11 +3,20 @@ import 'package:flutter/services.dart';
 
 import 'utils.dart';
 
+/// Package name used to resolve bundled assets when the package is consumed
+/// from another app.
 const String flutterBanglaMathPackageName = 'flutter_bangla_math';
+
+/// Default bundled Bengali font family used by this package.
 const String notoSansBengaliFamily = 'Noto Sans Bengali';
 
 final Future<void> _fontWarmup = _loadBundledBanglaFonts();
 
+/// Returns a [TextStyle] configured for Bangla text with the bundled
+/// Noto Sans Bengali font.
+///
+/// The optional [textStyle] is merged into the returned style and the locale
+/// is forced to Bangla to improve script shaping consistency.
 TextStyle defaultBanglaStyle([TextStyle? textStyle]) {
   final baseStyle = textStyle ?? const TextStyle();
   return baseStyle.copyWith(locale: banglaLocale).merge(
@@ -18,6 +27,12 @@ TextStyle defaultBanglaStyle([TextStyle? textStyle]) {
       );
 }
 
+/// Preloads the bundled Bangla font assets used by the package.
+///
+/// Calling this before `runApp` avoids the first-frame font warmup cost.
+///
+/// The [disableRuntimeFetching] parameter is kept for backward compatibility.
+/// Fonts are bundled with the package, so no runtime fetching is performed.
 Future<void> ensureBanglaMathFontsLoaded({
   bool disableRuntimeFetching = false,
 }) async {
