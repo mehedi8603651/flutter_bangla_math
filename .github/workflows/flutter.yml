@@ -1,0 +1,34 @@
+name: Flutter CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install root dependencies
+        run: flutter pub get
+
+      - name: Analyze package
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Install example dependencies
+        run: flutter pub get
+        working-directory: example
+
+      - name: Analyze example
+        run: flutter analyze
+        working-directory: example

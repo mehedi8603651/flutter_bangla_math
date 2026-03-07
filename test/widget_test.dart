@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bangla_math/flutter_bangla_math.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  testWidgets('inline math uses baseline aligned widget spans', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: BanglaMathText(
+              data: r'ধরি $a+b=c$ এখন সমান।',
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final richText = tester.widget<RichText>(find.byType(RichText).first);
+    final spans = _collectWidgetSpans(richText.text as TextSpan);
+
+    expect(spans, hasLength(1));
+    expect(spans.single.alignment, PlaceholderAlignment.baseline);
+    expect(spans.single.baseline, TextBaseline.alphabetic);
+  });
+
+  testWidgets('renders block math separately from inline content', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 420,
+            child: BanglaMathText(data: r'শুরু $$x^2+y^2=z^2$$ শেষ'),
+          ),
+        ),
+      ),
+    );
+
+    final column = tester.widget<Column>(
+      find.descendant(
+        of: find.byType(BanglaMathText),
+        matching: find.byType(Column),
+      ),
+    );
+
+    expect(column.children, hasLength(3));
+    expect(column.children[0], isA<RichText>());
+    expect(column.children[1], isA<Padding>());
+    expect(column.children[2], isA<RichText>());
+  });
+
+  testWidgets('matches golden for mixed Bangla and math', (tester) async {
+    tester.view.physicalSize = const Size(560, 520);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: SingleChildScrollView(
+              child: Container(
+                width: 460,
+                padding: const EdgeInsets.all(24),
+                color: Colors.white,
+                child: const BanglaMathText(
+                  data: r'''যদি $a^2+b^2=c^2$ হয়, তবে এটি সমকোণী ত্রিভুজ।
+
+$$\int_0^1 x^2\,dx=\frac{1}{3}$$
+
+মূল্য \$50 এবং সূত্র $x+y=z$।''',
+                  style: TextStyle(
+                    fontSize: 20,
+                    height: 1.6,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('goldens/bangla_math_text.png'),
+    );
+  });
+}
+
+List<WidgetSpan> _collectWidgetSpans(InlineSpan span) {
+  final spans = <WidgetSpan>[];
+
+  void visit(InlineSpan current) {
+    if (current case final WidgetSpan widgetSpan) {
+      spans.add(widgetSpan);
+      return;
+    }
+
+    if (current case final TextSpan textSpan) {
+      for (final child in textSpan.children ?? const <InlineSpan>[]) {
+        visit(child);
+      }
+    }
+  }
+
+  visit(span);
+  return spans;
+}
