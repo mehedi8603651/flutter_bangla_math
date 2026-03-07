@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
 import 'cache.dart';
@@ -81,7 +84,12 @@ class BanglaMathText extends StatelessWidget {
     final effectiveTextScaler = textScaler ?? MediaQuery.textScalerOf(context);
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = defaultStyle.merge(style);
-    final effectiveStyle = _resolveTextStyle(baseStyle);
+    final effectiveStyle = _resolveBanglaTextStyle(
+      baseStyle: baseStyle,
+      style: style,
+      fontFamily: fontFamily,
+      locale: locale,
+    );
     final effectiveCache = cache ?? MathWidgetCache.shared;
     final tokens = const BanglaMathParser().parse(data);
 
@@ -194,19 +202,172 @@ class BanglaMathText extends StatelessWidget {
           .toList(growable: false),
     );
   }
+}
 
-  TextStyle _resolveTextStyle(TextStyle baseStyle) {
-    final localizedStyle = baseStyle.copyWith(locale: locale);
+class BanglaMathFraction extends StatefulWidget {
+  const BanglaMathFraction({
+    super.key,
+    required this.numerator,
+    required this.denominator,
+    this.style,
+    this.mathConfig,
+    this.fontFamily,
+    this.locale = banglaLocale,
+    this.textAlign = TextAlign.center,
+    this.softWrap = true,
+    this.textScaler,
+    this.cache,
+    this.barColor,
+    this.barThickness = 1,
+    this.gap = 4,
+    this.padding = const EdgeInsets.symmetric(horizontal: 4),
+  }) : assert(barThickness > 0, 'barThickness must be positive.'),
+       assert(gap >= 0, 'gap must be non-negative.');
 
-    if (fontFamily != null && fontFamily!.isNotEmpty) {
-      return localizedStyle.copyWith(fontFamily: fontFamily);
+  final String numerator;
+  final String denominator;
+  final TextStyle? style;
+  final MathConfig? mathConfig;
+  final String? fontFamily;
+  final Locale locale;
+  final TextAlign textAlign;
+  final bool softWrap;
+  final TextScaler? textScaler;
+  final MathWidgetCache? cache;
+  final Color? barColor;
+  final double barThickness;
+  final double gap;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  State<BanglaMathFraction> createState() => _BanglaMathFractionState();
+}
+
+class _BanglaMathFractionState extends State<BanglaMathFraction> {
+  double _numeratorWidth = 0;
+  double _denominatorWidth = 0;
+
+  void _updateNumeratorWidth(Size size) {
+    if (!mounted || _numeratorWidth == size.width) {
+      return;
+    }
+    setState(() {
+      _numeratorWidth = size.width;
+    });
+  }
+
+  void _updateDenominatorWidth(Size size) {
+    if (!mounted || _denominatorWidth == size.width) {
+      return;
+    }
+    setState(() {
+      _denominatorWidth = size.width;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final defaultStyle = DefaultTextStyle.of(context).style;
+    final baseStyle = defaultStyle.merge(widget.style);
+    final effectiveStyle = _resolveBanglaTextStyle(
+      baseStyle: baseStyle,
+      style: widget.style,
+      fontFamily: widget.fontFamily,
+      locale: widget.locale,
+    );
+    final effectiveBarColor =
+        widget.barColor ?? effectiveStyle.color ?? Colors.black;
+    final barWidth = math.max(_numeratorWidth, _denominatorWidth);
+
+    return Align(
+      alignment: Alignment.center,
+      widthFactor: 1,
+      child: Padding(
+        padding: widget.padding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _MeasureSize(
+              onChange: _updateNumeratorWidth,
+              child: BanglaMathText(
+                data: widget.numerator,
+                style: widget.style,
+                mathConfig: widget.mathConfig,
+                fontFamily: widget.fontFamily,
+                locale: widget.locale,
+                textAlign: widget.textAlign,
+                softWrap: widget.softWrap,
+                textScaler: widget.textScaler,
+                cache: widget.cache,
+              ),
+            ),
+            SizedBox(height: widget.gap),
+            SizedBox(
+              width: barWidth,
+              height: widget.barThickness,
+              child: ColoredBox(color: effectiveBarColor),
+            ),
+            SizedBox(height: widget.gap),
+            _MeasureSize(
+              onChange: _updateDenominatorWidth,
+              child: BanglaMathText(
+                data: widget.denominator,
+                style: widget.style,
+                mathConfig: widget.mathConfig,
+                fontFamily: widget.fontFamily,
+                locale: widget.locale,
+                textAlign: widget.textAlign,
+                softWrap: widget.softWrap,
+                textScaler: widget.textScaler,
+                cache: widget.cache,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  const _MeasureSize({required this.onChange, required super.child});
+
+  final ValueChanged<Size> onChange;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderMeasureSize(onChange);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderMeasureSize renderObject,
+  ) {
+    renderObject.onChange = onChange;
+  }
+}
+
+class _RenderMeasureSize extends RenderProxyBox {
+  _RenderMeasureSize(this.onChange);
+
+  ValueChanged<Size> onChange;
+  Size? _oldSize;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    final newSize = child?.size;
+    if (newSize == null || newSize == _oldSize) {
+      return;
     }
 
-    if ((style?.fontFamily ?? baseStyle.fontFamily) != null) {
-      return localizedStyle;
-    }
-
-    return defaultBanglaStyle(localizedStyle);
+    _oldSize = newSize;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      onChange(newSize);
+    });
   }
 }
 
@@ -388,4 +549,23 @@ String _cacheKey({
     config.inlineScale.toStringAsFixed(3),
     config.blockScale.toStringAsFixed(3),
   ].join('|');
+}
+
+TextStyle _resolveBanglaTextStyle({
+  required TextStyle baseStyle,
+  required TextStyle? style,
+  required String? fontFamily,
+  required Locale locale,
+}) {
+  final localizedStyle = baseStyle.copyWith(locale: locale);
+
+  if (fontFamily != null && fontFamily.isNotEmpty) {
+    return localizedStyle.copyWith(fontFamily: fontFamily);
+  }
+
+  if ((style?.fontFamily ?? baseStyle.fontFamily) != null) {
+    return localizedStyle;
+  }
+
+  return defaultBanglaStyle(localizedStyle);
 }

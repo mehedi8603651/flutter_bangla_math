@@ -53,6 +53,131 @@ void main() {
     expect(column.children[2], isA<RichText>());
   });
 
+  testWidgets(
+    'fraction centers numerator and denominator with baseline-aligned inline math',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Directionality(
+              textDirection: TextDirection.ltr,
+              child: BanglaMathFraction(
+                numerator: r'লব $x+1$',
+                denominator: r'হর $y+2$',
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richTexts = tester
+          .widgetList<RichText>(
+            find.descendant(
+              of: find.byType(BanglaMathFraction),
+              matching: find.byType(RichText),
+            ),
+          )
+          .where(
+            (richText) =>
+                richText.textAlign == TextAlign.center &&
+                richText.text is TextSpan &&
+                _collectWidgetSpans(richText.text as TextSpan).isNotEmpty,
+          )
+          .toList();
+
+      expect(richTexts, hasLength(2));
+      expect(richTexts[0].textAlign, TextAlign.center);
+      expect(richTexts[1].textAlign, TextAlign.center);
+
+      final numeratorSpans = _collectWidgetSpans(richTexts[0].text as TextSpan);
+      final denominatorSpans = _collectWidgetSpans(
+        richTexts[1].text as TextSpan,
+      );
+
+      expect(numeratorSpans, hasLength(1));
+      expect(denominatorSpans, hasLength(1));
+      expect(numeratorSpans.single.alignment, PlaceholderAlignment.baseline);
+      expect(numeratorSpans.single.baseline, TextBaseline.alphabetic);
+      expect(denominatorSpans.single.alignment, PlaceholderAlignment.baseline);
+      expect(denominatorSpans.single.baseline, TextBaseline.alphabetic);
+    },
+  );
+
+  testWidgets('fraction divider honors inherited and custom bar styling', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: BanglaMathFraction(
+              numerator: r'লব $x$',
+              denominator: r'হর $y$',
+              style: TextStyle(fontSize: 18, color: Colors.teal),
+              barThickness: 2,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final inheritedBar = tester.widget<ColoredBox>(
+      find.descendant(
+        of: find.byType(BanglaMathFraction),
+        matching: find.byType(ColoredBox),
+      ),
+    );
+    expect(inheritedBar.color, Colors.teal);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is SizedBox &&
+            widget.height == 2 &&
+            widget.child is ColoredBox,
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: BanglaMathFraction(
+              numerator: r'লব $x$',
+              denominator: r'হর $y$',
+              style: TextStyle(fontSize: 18, color: Colors.teal),
+              barColor: Colors.deepOrange,
+              barThickness: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final customBar = tester.widget<ColoredBox>(
+      find.descendant(
+        of: find.byType(BanglaMathFraction),
+        matching: find.byType(ColoredBox),
+      ),
+    );
+    expect(customBar.color, Colors.deepOrange);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is SizedBox &&
+            widget.height == 3 &&
+            widget.child is ColoredBox,
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('matches golden for mixed Bangla and math', (tester) async {
     tester.view.physicalSize = const Size(560, 520);
     tester.view.devicePixelRatio = 1;

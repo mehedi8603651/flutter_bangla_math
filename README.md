@@ -9,6 +9,7 @@ Linux, macOS, and Windows without depending on runtime font fetching.
 
 - Inline math with `$...$`
 - Block math with `$$...$$`
+- Fraction layout with `BanglaMathFraction`
 - Escaped dollar handling with `\$`
 - Bangla text rendered with Noto Sans Bengali by default
 - Inline math baseline alignment tuned for mixed Bangla and math on the same
@@ -20,7 +21,7 @@ Linux, macOS, and Windows without depending on runtime font fetching.
 
 ```yaml
 dependencies:
-  flutter_bangla_math: ^0.2.0
+  flutter_bangla_math: ^0.3.0
 ```
 
 The current package version targets Flutter `>=3.35.0` and Dart `^3.9.0`
@@ -66,6 +67,16 @@ const BanglaMathText(
 );
 ```
 
+### Bangla Fraction
+
+```dart
+const BanglaMathFraction(
+  numerator: r'লব $x+1$',
+  denominator: r'হর $y+2$',
+  style: TextStyle(fontSize: 20),
+);
+```
+
 ### Custom Text Style
 
 ```dart
@@ -91,8 +102,28 @@ BanglaMathText({
 })
 ```
 
+```dart
+BanglaMathFraction({
+  required String numerator,
+  required String denominator,
+  TextStyle? style,
+  MathConfig? mathConfig,
+  String? fontFamily,
+  Locale locale = const Locale('bn'),
+  TextAlign textAlign = TextAlign.center,
+  bool softWrap = true,
+  TextScaler? textScaler,
+  MathWidgetCache? cache,
+  Color? barColor,
+  double barThickness = 1,
+  double gap = 4,
+  EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 4),
+})
+```
+
 `MathConfig` controls inline scaling, block spacing, parser settings, and error
-fallback styling.
+fallback styling. `BanglaMathFraction` reuses the same text and math pipeline,
+so numerator and denominator strings can contain Bangla text with inline math.
 
 ## Notes
 

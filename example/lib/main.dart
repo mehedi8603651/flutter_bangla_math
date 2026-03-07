@@ -49,6 +49,17 @@ $$\int_0^1 x^2\,dx=\frac{1}{3}$$
             ),
             SizedBox(height: 16),
             _ExampleSection(
+              title: 'Bangla Fraction',
+              child: BanglaMathFraction(
+                numerator: r'লব $x+1$',
+                denominator: r'হর $y+2$',
+                style: TextStyle(fontSize: 20, height: 1.5),
+                gap: 6,
+                barThickness: 1.5,
+              ),
+            ),
+            SizedBox(height: 16),
+            _ExampleSection(
               title: 'Long Paragraph',
               child: BanglaMathText(
                 data:

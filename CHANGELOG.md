@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Added `BanglaMathFraction` for stacked numerator/denominator layouts using
+  the same Bangla text and inline LaTeX rendering pipeline as
+  `BanglaMathText`.
+- Added example and widget test coverage for `BanglaMathFraction`.
+
 ## 0.2.0
 
 - Removed bundled Noto Serif Bengali to reduce package size.
