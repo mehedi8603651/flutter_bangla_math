@@ -4,6 +4,7 @@ import 'utils.dart';
 
 const int _backslashCodeUnit = 92;
 const int _dollarCodeUnit = 36;
+const String _banglaFractionCommand = r'\bnfrac';
 
 @immutable
 sealed class BanglaMathToken {
@@ -35,6 +36,27 @@ final class InlineMathToken extends BanglaMathToken {
 @immutable
 final class BlockMathToken extends BanglaMathToken {
   const BlockMathToken(super.value);
+}
+
+@immutable
+final class BanglaFractionToken extends BanglaMathToken {
+  const BanglaFractionToken({
+    required this.numerator,
+    required this.denominator,
+  }) : super('');
+
+  final String numerator;
+  final String denominator;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BanglaFractionToken &&
+          other.numerator == numerator &&
+          other.denominator == denominator;
+
+  @override
+  int get hashCode => Object.hash(runtimeType, numerator, denominator);
 }
 
 enum _ParserMode { text, inlineMath, blockMath }
@@ -79,6 +101,14 @@ List<BanglaMathToken> parseBanglaMath(String input) {
 
     switch (mode) {
       case _ParserMode.text:
+        final fractionResult = _tryParseBanglaFraction(normalizedInput, index);
+        if (fractionResult != null) {
+          emitText(textBuffer);
+          tokens.add(fractionResult.token);
+          index = fractionResult.endIndex;
+          continue;
+        }
+
         if (codeUnit != _dollarCodeUnit) {
           textBuffer.add(codeUnit);
           continue;
@@ -92,8 +122,7 @@ List<BanglaMathToken> parseBanglaMath(String input) {
           continue;
         }
 
-        final hasSecondDollar =
-            index + 1 < normalizedInput.length &&
+        final hasSecondDollar = index + 1 < normalizedInput.length &&
             normalizedInput.codeUnitAt(index + 1) == _dollarCodeUnit;
 
         emitText(textBuffer);
@@ -114,8 +143,7 @@ List<BanglaMathToken> parseBanglaMath(String input) {
         mathBuffer.add(codeUnit);
 
       case _ParserMode.blockMath:
-        final hasSecondDollar =
-            index + 1 < normalizedInput.length &&
+        final hasSecondDollar = index + 1 < normalizedInput.length &&
             normalizedInput.codeUnitAt(index + 1) == _dollarCodeUnit;
 
         if (codeUnit == _dollarCodeUnit &&
@@ -151,4 +179,93 @@ List<BanglaMathToken> parseBanglaMath(String input) {
   }
 
   return List.unmodifiable(tokens);
+}
+
+_BanglaFractionParseResult? _tryParseBanglaFraction(String input, int start) {
+  if (!input.startsWith(_banglaFractionCommand, start)) {
+    return null;
+  }
+
+  var cursor = start + _banglaFractionCommand.length;
+  cursor = _skipWhitespace(input, cursor);
+
+  final numerator = _readBalancedArgument(input, cursor);
+  if (numerator == null) {
+    return null;
+  }
+
+  cursor = _skipWhitespace(input, numerator.endIndex + 1);
+  final denominator = _readBalancedArgument(input, cursor);
+  if (denominator == null) {
+    return null;
+  }
+
+  return _BanglaFractionParseResult(
+    token: BanglaFractionToken(
+      numerator: numerator.content,
+      denominator: denominator.content,
+    ),
+    endIndex: denominator.endIndex,
+  );
+}
+
+int _skipWhitespace(String input, int start) {
+  var cursor = start;
+  while (cursor < input.length) {
+    final character = input[cursor];
+    if (character != ' ' && character != '\n' && character != '\t') {
+      break;
+    }
+    cursor++;
+  }
+  return cursor;
+}
+
+_BalancedArgumentRead? _readBalancedArgument(String input, int start) {
+  if (start >= input.length || input.codeUnitAt(start) != '{'.codeUnitAt(0)) {
+    return null;
+  }
+
+  var depth = 1;
+  for (var index = start + 1; index < input.length; index++) {
+    final codeUnit = input.codeUnitAt(index);
+    if (codeUnit == '{'.codeUnitAt(0) && !_isEscapedCharacter(input, index)) {
+      depth++;
+      continue;
+    }
+
+    if (codeUnit == '}'.codeUnitAt(0) && !_isEscapedCharacter(input, index)) {
+      depth--;
+      if (depth == 0) {
+        return _BalancedArgumentRead(
+          content: input.substring(start + 1, index),
+          endIndex: index,
+        );
+      }
+    }
+  }
+
+  return null;
+}
+
+bool _isEscapedCharacter(String input, int index) =>
+    countEscapingBackslashes(input, index).isOdd;
+
+@immutable
+final class _BalancedArgumentRead {
+  const _BalancedArgumentRead({required this.content, required this.endIndex});
+
+  final String content;
+  final int endIndex;
+}
+
+@immutable
+final class _BanglaFractionParseResult {
+  const _BanglaFractionParseResult({
+    required this.token,
+    required this.endIndex,
+  });
+
+  final BanglaFractionToken token;
+  final int endIndex;
 }

@@ -53,6 +53,40 @@ void main() {
     expect(column.children[2], isA<RichText>());
   });
 
+  testWidgets(r'BanglaMathText renders \bnfrac inline as a fraction widget', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Directionality(
+            textDirection: TextDirection.ltr,
+            child: BanglaMathText(
+              data: r'যদি \bnfrac{লব $x+1$}{হর $y+2$} হয়, তবে মান বের করো।',
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BanglaMathFraction), findsOneWidget);
+
+    final richText = tester.widget<RichText>(find.byType(RichText).first);
+    final spans = _collectWidgetSpans(richText.text as TextSpan);
+
+    expect(spans, isNotEmpty);
+    expect(
+      spans.any(
+        (span) =>
+            span.alignment == PlaceholderAlignment.middle &&
+            span.child is Padding,
+      ),
+      isTrue,
+    );
+  });
+
   testWidgets(
     'fraction centers numerator and denominator with baseline-aligned inline math',
     (tester) async {

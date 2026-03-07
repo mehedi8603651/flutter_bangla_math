@@ -129,6 +129,30 @@ class BanglaMathText extends StatelessWidget {
             ),
           );
 
+        case BanglaFractionToken():
+          inlineSpans.add(
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: BanglaMathFraction(
+                  numerator: token.numerator,
+                  denominator: token.denominator,
+                  style: effectiveStyle,
+                  mathConfig: effectiveConfig,
+                  fontFamily: fontFamily,
+                  locale: locale,
+                  textAlign: TextAlign.center,
+                  softWrap: softWrap,
+                  textScaler: effectiveTextScaler,
+                  cache: effectiveCache,
+                  gap: 3,
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          );
+
         case BlockMathToken():
           flushInline();
           segments.add(
@@ -166,40 +190,38 @@ class BanglaMathText extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
-      children: segments
-          .map((segment) {
-            return switch (segment) {
-              _InlineSegment(:final spans) => RichText(
-                text: TextSpan(style: effectiveStyle, children: spans),
-                textAlign: textAlign,
-                softWrap: softWrap,
-                textScaler: effectiveTextScaler,
+      children: segments.map((segment) {
+        return switch (segment) {
+          _InlineSegment(:final spans) => RichText(
+              text: TextSpan(style: effectiveStyle, children: spans),
+              textAlign: textAlign,
+              softWrap: softWrap,
+              textScaler: effectiveTextScaler,
+            ),
+          _BlockSegment(
+            :final token,
+            :final baseStyle,
+            :final config,
+            :final textScaler,
+            :final cache,
+          ) =>
+            Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: config.blockVerticalMargin / 2,
               ),
-              _BlockSegment(
-                :final token,
-                :final baseStyle,
-                :final config,
-                :final textScaler,
-                :final cache,
-              ) =>
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: config.blockVerticalMargin / 2,
-                  ),
-                  child: Align(
-                    alignment: config.blockAlignment,
-                    child: _BlockMath(
-                      token: token,
-                      baseStyle: baseStyle,
-                      config: config,
-                      textScaler: textScaler,
-                      cache: cache,
-                    ),
-                  ),
+              child: Align(
+                alignment: config.blockAlignment,
+                child: _BlockMath(
+                  token: token,
+                  baseStyle: baseStyle,
+                  config: config,
+                  textScaler: textScaler,
+                  cache: cache,
                 ),
-            };
-          })
-          .toList(growable: false),
+              ),
+            ),
+        };
+      }).toList(growable: false),
     );
   }
 }
@@ -221,8 +243,8 @@ class BanglaMathFraction extends StatefulWidget {
     this.barThickness = 1,
     this.gap = 4,
     this.padding = const EdgeInsets.symmetric(horizontal: 4),
-  }) : assert(barThickness > 0, 'barThickness must be positive.'),
-       assert(gap >= 0, 'gap must be non-negative.');
+  })  : assert(barThickness > 0, 'barThickness must be positive.'),
+        assert(gap >= 0, 'gap must be non-negative.');
 
   final String numerator;
   final String denominator;
@@ -542,7 +564,7 @@ String _cacheKey({
     style.name,
     tex,
     fontSize.toStringAsFixed(3),
-    color?.toARGB32().toRadixString(16) ?? 'null',
+    color?.toString() ?? 'null',
     fontWeight?.value.toString() ?? 'null',
     fontStyle?.name ?? 'null',
     config.logicalPpi?.toStringAsFixed(3) ?? 'null',

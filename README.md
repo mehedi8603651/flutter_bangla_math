@@ -2,31 +2,28 @@
 
 `flutter_bangla_math` renders mixed Bangla text and LaTeX math in Flutter
 without breaking Bengali glyph shaping. It uses `flutter_math_fork` for TeX
-rendering and bundles Noto Sans Bengali so it works on Android, iOS, web,
-Linux, macOS, and Windows without depending on runtime font fetching.
+rendering and bundles Noto Sans Bengali so it works offline on Android, iOS,
+web, Linux, macOS, and Windows.
 
 ## Features
 
 - Inline math with `$...$`
 - Block math with `$$...$$`
 - Fraction layout with `BanglaMathFraction`
+- Inline `\bnfrac{...}{...}` syntax inside `BanglaMathText`
 - Escaped dollar handling with `\$`
-- Bangla text rendered with Noto Sans Bengali by default
-- Inline math baseline alignment tuned for mixed Bangla and math on the same
-  line
-- Offline-safe bundled Noto Sans Bengali font loading
-- Simple LRU cache for repeated math fragments
+- Bangla text rendered with bundled Noto Sans Bengali by default
+- Inline math baseline alignment tuned for mixed Bangla and math on the same line
+- Offline-safe bundled font loading with no runtime font fetching dependency
 
 ## Installation
 
 ```yaml
 dependencies:
-  flutter_bangla_math: ^0.3.0
+  flutter_bangla_math: ^0.4.0
 ```
 
-The current package version targets Flutter `>=3.35.0` and Dart `^3.9.0`
-because it uses the current `google_fonts` and `flutter_lints` releases that
-fit cleanly on current Flutter stable.
+The current package targets Flutter `>=3.16.0` and Dart `>=3.2.0 <4.0.0`.
 
 ## Usage
 
@@ -36,7 +33,7 @@ import 'package:flutter_bangla_math/flutter_bangla_math.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ensureBanglaMathFontsLoaded(disableRuntimeFetching: true);
+  await ensureBanglaMathFontsLoaded();
   runApp(const DemoApp());
 }
 
@@ -74,6 +71,14 @@ const BanglaMathFraction(
   numerator: r'লব $x+1$',
   denominator: r'হর $y+2$',
   style: TextStyle(fontSize: 20),
+);
+```
+
+### Inline Fraction Syntax
+
+```dart
+const BanglaMathText(
+  data: r'যদি $a^2+b^2=c^2$ হয়, তবে \bnfrac{লব $x+1$}{হর $y+2$} হবে।',
 );
 ```
 
@@ -124,16 +129,16 @@ BanglaMathFraction({
 `MathConfig` controls inline scaling, block spacing, parser settings, and error
 fallback styling. `BanglaMathFraction` reuses the same text and math pipeline,
 so numerator and denominator strings can contain Bangla text with inline math.
+`BanglaMathText` also supports inline `\bnfrac{...}{...}` tokens in normal
+paragraph text.
 
 ## Notes
 
 - Unmatched `$` or `$$` delimiters fall back to plain text instead of crashing.
 - The package bundles only Noto Sans Bengali to keep size lower.
+- `ensureBanglaMathFontsLoaded()` is still available and preloads the bundled font.
 - The Noto Sans Bengali OFL text remains in the repository for reference, but
   it is not bundled into runtime Flutter assets.
-- On web, `flutter_math_fork` works for normal cases. If your app needs a
-  KaTeX-based HTML fallback for highly specialized equations, keep that as an
-  app-level escape hatch rather than part of this package API.
 
 ## Development
 

@@ -38,5 +38,32 @@ void main() {
     test('keeps escaped dollar inside math content', () {
       expect(parseBanglaMath(r'$x+\$y$'), const [InlineMathToken(r'x+\$y')]);
     });
+
+    test('parses inline bangla fractions between text tokens', () {
+      expect(
+        parseBanglaMath(
+          r'যদি \bnfrac{লব $x+1$}{হর $y+2$} হয়, তবে মান বের করো।',
+        ),
+        const [
+          TextToken('যদি '),
+          BanglaFractionToken(numerator: r'লব $x+1$', denominator: r'হর $y+2$'),
+          TextToken(' হয়, তবে মান বের করো।'),
+        ],
+      );
+    });
+
+    test('keeps balanced braces inside bnfrac arguments', () {
+      expect(
+        parseBanglaMath(
+          r'\bnfrac{লব $\frac{x+1}{y+2}$}{হর \bnfrac{ক $m$}{খ $n$}}',
+        ),
+        const [
+          BanglaFractionToken(
+            numerator: r'লব $\frac{x+1}{y+2}$',
+            denominator: r'হর \bnfrac{ক $m$}{খ $n$}',
+          ),
+        ],
+      );
+    });
   });
 }

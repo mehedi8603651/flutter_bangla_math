@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'utils.dart';
 
@@ -11,35 +10,30 @@ final Future<void> _fontWarmup = _loadBundledBanglaFonts();
 
 TextStyle defaultBanglaStyle([TextStyle? textStyle]) {
   final baseStyle = textStyle ?? const TextStyle();
-  return GoogleFonts.notoSansBengali(
-    textStyle: baseStyle.copyWith(locale: banglaLocale),
-  );
+  return baseStyle.copyWith(locale: banglaLocale).merge(
+        const TextStyle(
+          fontFamily: notoSansBengaliFamily,
+          package: flutterBanglaMathPackageName,
+        ),
+      );
 }
 
 Future<void> ensureBanglaMathFontsLoaded({
   bool disableRuntimeFetching = false,
 }) async {
+  // Kept for backward compatibility. Fonts are bundled, so there is no
+  // runtime fetching path to disable.
   if (disableRuntimeFetching) {
-    GoogleFonts.config.allowRuntimeFetching = false;
+    // Intentionally left blank.
   }
   await _fontWarmup;
 }
 
 Future<void> _loadBundledBanglaFonts() async {
-  await Future.wait([
-    _loadFontVariant(
-      'NotoSansBengali_400_regular',
-      'assets/fonts/NotoSansBengali-Regular.ttf',
-    ),
-    _loadFontVariant(
-      'NotoSansBengali_700_regular',
-      'assets/fonts/NotoSansBengali-Bold.ttf',
-    ),
-  ]);
-}
+  final fontLoader = FontLoader(notoSansBengaliFamily)
+    ..addFont(_loadByteData('assets/fonts/NotoSansBengali-Regular.ttf'))
+    ..addFont(_loadByteData('assets/fonts/NotoSansBengali-Bold.ttf'));
 
-Future<void> _loadFontVariant(String family, String assetPath) async {
-  final fontLoader = FontLoader(family)..addFont(_loadByteData(assetPath));
   await fontLoader.load();
 }
 

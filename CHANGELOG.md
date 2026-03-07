@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+- Added inline `\bnfrac{...}{...}` parsing in `BanglaMathText` so a Bangla
+  fraction can appear in the same line as surrounding text and math.
+- Added parser and widget test coverage for inline `\bnfrac` rendering.
+- Added example and README documentation for the new inline fraction syntax.
+- Lowered the package compatibility target to Dart `>=3.2.0 <4.0.0` and
+  Flutter `>=3.16.0`.
+- Removed the runtime `google_fonts` dependency and kept bundled Noto Sans
+  Bengali as the default font source.
+
 ## 0.3.0
 
 - Added `BanglaMathFraction` for stacked numerator/denominator layouts using

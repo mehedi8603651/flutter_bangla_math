@@ -60,6 +60,15 @@ $$\int_0^1 x^2\,dx=\frac{1}{3}$$
             ),
             SizedBox(height: 16),
             _ExampleSection(
+              title: 'Inline bnfrac Syntax',
+              child: BanglaMathText(
+                data:
+                    r'যদি $a^2+b^2=c^2$ হয়, তবে \bnfrac{লব $x+1$}{হর $y+2$} ব্যবহার করে একই লাইনে ভগ্নাংশ দেখানো যায়।',
+                style: TextStyle(fontSize: 20, height: 1.5),
+              ),
+            ),
+            SizedBox(height: 16),
+            _ExampleSection(
               title: 'Long Paragraph',
               child: BanglaMathText(
                 data:
