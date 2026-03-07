@@ -6,20 +6,12 @@ import 'utils.dart';
 
 const String flutterBanglaMathPackageName = 'flutter_bangla_math';
 const String notoSansBengaliFamily = 'Noto Sans Bengali';
-const String notoSerifBengaliFamily = 'Noto Serif Bengali';
 
 final Future<void> _fontWarmup = _loadBundledBanglaFonts();
 
 TextStyle defaultBanglaStyle([TextStyle? textStyle]) {
   final baseStyle = textStyle ?? const TextStyle();
   return GoogleFonts.notoSansBengali(
-    textStyle: baseStyle.copyWith(locale: banglaLocale),
-  );
-}
-
-TextStyle defaultBanglaSerifStyle([TextStyle? textStyle]) {
-  final baseStyle = textStyle ?? const TextStyle();
-  return GoogleFonts.notoSerifBengali(
     textStyle: baseStyle.copyWith(locale: banglaLocale),
   );
 }
@@ -42,14 +34,6 @@ Future<void> _loadBundledBanglaFonts() async {
     _loadFontVariant(
       'NotoSansBengali_700_regular',
       'assets/fonts/NotoSansBengali-Bold.ttf',
-    ),
-    _loadFontVariant(
-      'NotoSerifBengali_400_regular',
-      'assets/fonts/NotoSerifBengali-Regular.ttf',
-    ),
-    _loadFontVariant(
-      'NotoSerifBengali_700_regular',
-      'assets/fonts/NotoSerifBengali-Bold.ttf',
     ),
   ]);
 }

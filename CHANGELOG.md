@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Removed bundled Noto Serif Bengali to reduce package size.
+- Removed license text files from Flutter runtime assets.
+- Kept Noto Sans Bengali as the only bundled Bengali font.
+
 ## 0.1.0
 
 - Initial release of `flutter_bangla_math`.

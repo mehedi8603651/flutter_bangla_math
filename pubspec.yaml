@@ -2,7 +2,7 @@ name: flutter_bangla_math
 description: >
   Render mixed Bangla text and LaTeX math in Flutter without breaking Bengali
   glyph shaping.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/mehedi8603651/flutter_bangla_math
 issue_tracker: https://github.com/mehedi8603651/flutter_bangla_math/issues
 documentation: https://github.com/mehedi8603651/flutter_bangla_math#readme
@@ -21,7 +21,6 @@ dependencies:
     sdk: flutter
   flutter_math_fork: ^0.7.4
   google_fonts: ^8.0.2
-  characters: ^1.4.0
   collection: ^1.19.1
 
 dev_dependencies:
@@ -34,18 +33,9 @@ flutter:
   assets:
     - assets/fonts/NotoSansBengali-Regular.ttf
     - assets/fonts/NotoSansBengali-Bold.ttf
-    - assets/fonts/NotoSerifBengali-Regular.ttf
-    - assets/fonts/NotoSerifBengali-Bold.ttf
-    - assets/licenses/NotoSansBengali-OFL.txt
-    - assets/licenses/NotoSerifBengali-OFL.txt
   fonts:
     - family: Noto Sans Bengali
       fonts:
         - asset: assets/fonts/NotoSansBengali-Regular.ttf
         - asset: assets/fonts/NotoSansBengali-Bold.ttf
-          weight: 700
-    - family: Noto Serif Bengali
-      fonts:
-        - asset: assets/fonts/NotoSerifBengali-Regular.ttf
-        - asset: assets/fonts/NotoSerifBengali-Bold.ttf
           weight: 700
