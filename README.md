@@ -25,8 +25,8 @@ dependencies:
 ```
 
 The current package version targets Flutter `>=3.35.0` and Dart `^3.9.0`
-because it uses the latest `google_fonts` and `flutter_lints` releases that
-support bundled-font discovery cleanly on current Flutter stable.
+because it uses the current `google_fonts` and `flutter_lints` releases that
+fit the package requirements cleanly on current Flutter stable.
 
 ## Usage
 
