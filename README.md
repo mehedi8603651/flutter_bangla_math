@@ -21,7 +21,7 @@ web, Linux, macOS, and Windows.
 
 ```yaml
 dependencies:
-  flutter_bangla_math: ^0.4.1
+  flutter_bangla_math: ^0.4.2
 ```
 
 The current package targets Flutter `>=3.16.0` and Dart `>=3.2.0 <4.0.0`.

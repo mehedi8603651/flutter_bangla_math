@@ -2,7 +2,7 @@ name: flutter_bangla_math
 description: >
   Render mixed Bangla text and LaTeX math in Flutter without breaking Bengali
   glyph shaping.
-version: 0.4.1
+version: 0.4.2
 repository: https://github.com/mehedi8603651/flutter_bangla_math
 issue_tracker: https://github.com/mehedi8603651/flutter_bangla_math/issues
 documentation: https://github.com/mehedi8603651/flutter_bangla_math#readme

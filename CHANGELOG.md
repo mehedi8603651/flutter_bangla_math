@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- Re-published the 0.4.1 documentation and cache fixes as a new patch version.
+
 ## 0.4.1
 
 - Added dartdoc comments across the exported API to improve pub.dev
