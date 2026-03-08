@@ -4,6 +4,12 @@
 
 - Added dartdoc comments across the exported API to improve pub.dev
   documentation coverage and package score.
+- Clarified README examples for raw strings, multiline strings, and inline
+  `\bnfrac` usage.
+- Added a widget regression test for repeated `\bnfrac` rendering across
+  multiple `BanglaMathText` widgets.
+- Fixed math cache reuse so repeated formulas can appear multiple times in the
+  same widget tree without `GlobalKey` collisions.
 
 ## 0.4.0
 

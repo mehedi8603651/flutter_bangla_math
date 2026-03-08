@@ -88,6 +88,34 @@ void main() {
   });
 
   testWidgets(
+    r'multiple BanglaMathText widgets can each render identical \bnfrac content',
+    (tester) async {
+      const sample =
+          r'যদি \bnfrac{লব $x+1$}{হর $y+2$} হয়, তবে একই ভগ্নাংশ আবার দেখাও।';
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BanglaMathText(data: sample, style: TextStyle(fontSize: 20)),
+                  SizedBox(height: 12),
+                  BanglaMathText(data: sample, style: TextStyle(fontSize: 20)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BanglaMathFraction), findsNWidgets(2));
+    },
+  );
+
+  testWidgets(
     'fraction centers numerator and denominator with baseline-aligned inline math',
     (tester) async {
       await tester.pumpWidget(

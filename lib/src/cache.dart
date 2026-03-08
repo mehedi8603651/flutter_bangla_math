@@ -2,20 +2,25 @@ import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 
-/// A small LRU cache for rendered math widgets.
+typedef _MathWidgetFactory = Widget Function();
+
+/// A small LRU cache for reusable math widget factories.
 ///
 /// The cache is keyed by a string that typically includes the TeX source plus
-/// the layout parameters used to render it.
+/// the layout parameters used to render it. Each cache hit returns a fresh
+/// widget instance so repeated formulas can appear multiple times in the same
+/// tree without GlobalKey collisions inside `flutter_math_fork`.
 class MathWidgetCache {
   /// Creates a cache with an upper bound on stored entries.
   MathWidgetCache({this.maxEntries = 128})
       : assert(maxEntries > 0, 'maxEntries must be positive.');
 
-  /// Maximum number of widgets retained before older entries are evicted.
+  /// Maximum number of cached math builders retained before older entries are
+  /// evicted.
   final int maxEntries;
 
-  final LinkedHashMap<String, Widget> _entries =
-      LinkedHashMap<String, Widget>();
+  final LinkedHashMap<String, _MathWidgetFactory> _entries =
+      LinkedHashMap<String, _MathWidgetFactory>();
 
   /// Shared cache instance used by widgets when no custom cache is supplied.
   static final MathWidgetCache shared = MathWidgetCache();
@@ -23,31 +28,31 @@ class MathWidgetCache {
   /// Number of cached entries currently retained.
   int get length => _entries.length;
 
-  /// Returns a cached widget for [key] and marks it as most recently used.
+  /// Returns a fresh widget built from the cached entry for [key] and marks it
+  /// as most recently used.
   Widget? get(String key) {
-    final value = _entries.remove(key);
-    if (value == null) {
+    final factory = _entries.remove(key);
+    if (factory == null) {
       return null;
     }
-    _entries[key] = value;
-    return value;
+    _entries[key] = factory;
+    return factory();
   }
 
-  /// Returns the cached widget for [key], or stores the result of [builder].
+  /// Returns a fresh widget for [key], or stores [builder] for future use.
   Widget putIfAbsent(String key, Widget Function() builder) {
     final cached = get(key);
     if (cached != null) {
       return cached;
     }
 
-    final value = builder();
-    _entries[key] = value;
+    _entries[key] = builder;
 
     while (_entries.length > maxEntries) {
       _entries.remove(_entries.keys.first);
     }
 
-    return value;
+    return builder();
   }
 
   /// Removes a single cached entry for [key].
